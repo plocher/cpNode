@@ -1,0 +1,42 @@
+#######################################
+# Syntax Coloring Map for CMRI library
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+cpNode			KEYWORD1
+IOX     		KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+
+setCMRIPort		KEYWORD2
+setDebugPort		KEYWORD2
+setNodeAddress		KEYWORD2
+getNodeAddress		KEYWORD2
+invertInputs		KEYWORD2
+invertOutputs		KEYWORD2
+setNumInputBytes	KEYWORD2
+getNumInputBytes	KEYWORD2
+setNumOutputBytes	KEYWORD2
+getNumOutputBytes	KEYWORD2
+long getTXDelay		KEYWORD2
+proceess		KEYWORD2
+
+init			KEYWORD2
+write			KEYWORD2
+read			KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+IN			LITERAL1
+OUT			LITERAL1
+PORT_A			LITERAL1
+PORT_B			LITERAL1
+

@@ -1,0 +1,5 @@
+cpNode CMRINet Node implementation
+
+CMRI serial protocol node handler for an Arduino style system board.
+
+
