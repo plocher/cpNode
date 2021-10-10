@@ -71,7 +71,7 @@ void setup(void) {
 
     Serial.println(F("\nCMRI Node configuration: BBLEO (8IN 8OUT)\n"));
     Serial.print(F("    Baud Rate:        ")); Serial.println(CMRINET_SPEED, DEC);
-    Serial.print(F("    Node ua:          ")); Serial.println(cmri.getNodeAddress);
+    Serial.print(F("    Node ua:          ")); Serial.println(cmri.getNodeAddress());
     Serial.print(F("    Memory Available: ")); Serial.println(freeRam());
 }
 
