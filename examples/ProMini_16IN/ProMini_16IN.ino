@@ -21,7 +21,7 @@ const long CMRINET_SPEED = 19200;                 // 9600, 19200 ...
 
 // the following need to match the code in setup(), pack() and unpack()...
 const int  InputBytes  = 2 + 0;                    // 2x onboard
-const int  OutputBytes = 2 + 4;                    // 2x onboard plus 2x IOX-32
+const int  OutputBytes = 2 + 8;                    // 2x onboard plus 2x IOX-32
 
 void setup(void) {
     // *************************************************
@@ -133,10 +133,16 @@ void pack(byte *IB, int len) {
 
 void unpack(byte *OB, int len) {
     // onboard 16 bits (bytes 0 and 1) are inputs...
+    // IOX32 #1 segments 1 & 2
     if (len >= 3) iox.write(0x20, IOX::PORT_A, OB[2]);
     if (len >= 4) iox.write(0x20, IOX::PORT_B, OB[3]);
     if (len >= 5) iox.write(0x21, IOX::PORT_A, OB[4]);
     if (len >= 6) iox.write(0x21, IOX::PORT_B, OB[5]);
+    // IOX32 #2 segments 1 & 2
+    if (len >= 7) iox.write(0x22, IOX::PORT_A, OB[6]);
+    if (len >= 8) iox.write(0x22, IOX::PORT_B, OB[7]);
+    if (len >= 9) iox.write(0x23, IOX::PORT_A, OB[8]);
+    if (len >=10) iox.write(0x23, IOX::PORT_B, OB[9]);
 }
 
 void loop(void) {
