@@ -74,31 +74,34 @@ void setup(void) {
 //  external I/O expanders and puts the them into the correct IB array bytes
 //  for transmission back to the control host.
 //
-//  len bytes need to be read:
+//  len bytes (as set by setNumInputBytes above) need to be read:
 //  Onboard I/O goes in the first two bytes, IB[0] and IB[1]
 //  The rest of the bytes are used by the optional IO expanders
 // ---------------------------------------------------------------------------
 
 void pack(byte *IB, int len) {
-    if (len >= 3) IB[2] = iox.read(0x20, IOX::PORT_A);
-    if (len >= 4) IB[3] = iox.read(0x20, IOX::PORT_B);
-    if (len >= 5) IB[4] = iox.read(0x21, IOX::PORT_A);
-    if (len >= 6) IB[5] = iox.read(0x21, IOX::PORT_B);
+    IB[0] = 0;
+    IB[1] = 0;
 
-    if (len >= 7) IB[6] = iox.read(0x22, IOX::PORT_A);
-    if (len >= 8) IB[7] = iox.read(0x22, IOX::PORT_B);
-    if (len >= 9) IB[8] = iox.read(0x23, IOX::PORT_A);
-    if (len >=10) IB[9] = iox.read(0x23, IOX::PORT_B);
+    IB[2] = iox.read(0x20, IOX::PORT_A);
+    IB[3] = iox.read(0x20, IOX::PORT_B);
+    IB[4] = iox.read(0x21, IOX::PORT_A);
+    IB[5] = iox.read(0x21, IOX::PORT_B);
 
-    if (len >=11) IB[10] = iox.read(0x24, IOX::PORT_A);
-    if (len >=12) IB[11] = iox.read(0x24, IOX::PORT_B);
-    if (len >=13) IB[12] = iox.read(0x25, IOX::PORT_A);
-    if (len >=14) IB[13] = iox.read(0x25, IOX::PORT_B);
+    IB[6] = iox.read(0x22, IOX::PORT_A);
+    IB[7] = iox.read(0x22, IOX::PORT_B);
+    IB[8] = iox.read(0x23, IOX::PORT_A);
+    IB[9] = iox.read(0x23, IOX::PORT_B);
 
-    if (len >=15) IB[14] = iox.read(0x26, IOX::PORT_A);
-    if (len >=16) IB[15] = iox.read(0x26, IOX::PORT_B);
-    if (len >=17) IB[16] = iox.read(0x27, IOX::PORT_A);
-    if (len >=18) IB[17] = iox.read(0x27, IOX::PORT_B);
+    IB[10] = iox.read(0x24, IOX::PORT_A);
+    IB[11] = iox.read(0x24, IOX::PORT_B);
+    IB[12] = iox.read(0x25, IOX::PORT_A);
+    IB[13] = iox.read(0x25, IOX::PORT_B);
+
+    IB[14] = iox.read(0x26, IOX::PORT_A);
+    IB[15] = iox.read(0x26, IOX::PORT_B);
+    IB[16] = iox.read(0x27, IOX::PORT_A);
+    IB[17] = iox.read(0x27, IOX::PORT_B);
 }
 
 // ---------------------------------------------------------------------------
@@ -108,7 +111,7 @@ void pack(byte *IB, int len) {
 //  ouput buffer and write them to the correct output ports using either
 //  digitalWrite() or the IO expanders
 //
-//  len bytes are available to be written
+//  len bytes (as set by setNumOutputBytes above) are available to be written
 //  Onboard I/O comes from the first two bytes, followed by IO expander bytes
 //----------------------------------------------------------------------------
 

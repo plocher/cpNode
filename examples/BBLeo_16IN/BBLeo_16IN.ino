@@ -84,34 +84,31 @@ void setup(void) {
 //  external I/O expanders and puts the them into the correct IB array bytes
 //  for transmission back to the control host.
 //
-//  len bytes need to be read:
+//  len bytes (as set by setNumInputBytes above) need to be read:
 //  Onboard I/O goes in the first two bytes, IB[0] and IB[1]
 //  The rest of the bytes are used by the optional IO expanders
 // ---------------------------------------------------------------------------
 
 void pack(byte *IB, int len) {
-    if (len >= 1) {
-        IB[0] = 0;
-        IB[0] |= (!digitalRead(4)  << 0);
-        IB[0] |= (!digitalRead(5)  << 1);
-        IB[0] |= (!digitalRead(6)  << 2);
-        IB[0] |= (!digitalRead(7)  << 3);
-        IB[0] |= (!digitalRead(8)  << 4);
-        IB[0] |= (!digitalRead(9)  << 5);
-        IB[0] |= (!digitalRead(10) << 6);
-        IB[0] |= (!digitalRead(11) << 7);
-    }
-    if (len >= 2) {
-        IB[1] = 0;
-        IB[1] |= (!digitalRead(12) << 0);
-        IB[1] |= (!digitalRead(13) << 1);
-        IB[1] |= (!digitalRead(A0) << 2);
-        IB[1] |= (!digitalRead(A1) << 3);
-        IB[1] |= (!digitalRead(A2) << 4);
-        IB[1] |= (!digitalRead(A3) << 5);
-        IB[1] |= (!digitalRead(A4) << 6);
-        IB[1] |= (!digitalRead(A5) << 7);
-    }
+    IB[0] = 0;
+    IB[0] |= (!digitalRead(4)  << 0);
+    IB[0] |= (!digitalRead(5)  << 1);
+    IB[0] |= (!digitalRead(6)  << 2);
+    IB[0] |= (!digitalRead(7)  << 3);
+    IB[0] |= (!digitalRead(8)  << 4);
+    IB[0] |= (!digitalRead(9)  << 5);
+    IB[0] |= (!digitalRead(10) << 6);
+    IB[0] |= (!digitalRead(11) << 7);
+
+    IB[1] = 0;
+    IB[1] |= (!digitalRead(12) << 0);
+    IB[1] |= (!digitalRead(13) << 1);
+    IB[1] |= (!digitalRead(A0) << 2);
+    IB[1] |= (!digitalRead(A1) << 3);
+    IB[1] |= (!digitalRead(A2) << 4);
+    IB[1] |= (!digitalRead(A3) << 5);
+    IB[1] |= (!digitalRead(A4) << 6);
+    IB[1] |= (!digitalRead(A5) << 7);
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +118,7 @@ void pack(byte *IB, int len) {
 //  ouput buffer and write them to the correct output ports using either
 //  digitalWrite() or the IO expanders
 //
-//  len bytes are available to be written
+//  len bytes (as set by setNumOutputBytes above) are available to be written
 //  Onboard I/O comes from the first two bytes, followed by IO expander bytes
 //----------------------------------------------------------------------------
 

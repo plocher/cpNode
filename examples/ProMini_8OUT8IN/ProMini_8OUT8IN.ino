@@ -76,7 +76,7 @@ void setup(void) {
 //  external I/O expanders and puts the them into the correct IB array bytes
 //  for transmission back to the control host.
 //
-//  len bytes need to be read:
+//  len bytes (as set by setNumInputBytes above) need to be read:
 //  Onboard I/O goes in the first two bytes, IB[0] and IB[1]
 //  The rest of the bytes are used by the optional IO expanders
 // ---------------------------------------------------------------------------
@@ -86,18 +86,18 @@ void pack(byte *IB, int len) {
     // IB0 ignored     IB1 8 bits
     // xxxxxxxx        IIIIIIII
     //----------------------------
-    if (len >= 1) IB[0] = 0;  // shadowed by Output bits...
-    if (len >= 2) {
-        IB[1] = 0;
-        IB[1] |= (!digitalRead(10) << 0);
-        IB[1] |= (!digitalRead(11) << 1);
-        IB[1] |= (!digitalRead(12) << 2);
-        IB[1] |= (!digitalRead(13) << 3);
-        IB[1] |= (!digitalRead(A0) << 4);
-        IB[1] |= (!digitalRead(A1) << 5);
-        IB[1] |= (!digitalRead(A2) << 6);
-        IB[1] |= (!digitalRead(A3) << 7);
-    }
+    IB[0] = 0;  // shadowed by Output bits...
+
+    IB[1] = 0;
+    IB[1] |= (!digitalRead(10) << 0);
+    IB[1] |= (!digitalRead(11) << 1);
+    IB[1] |= (!digitalRead(12) << 2);
+    IB[1] |= (!digitalRead(13) << 3);
+    IB[1] |= (!digitalRead(A0) << 4);
+    IB[1] |= (!digitalRead(A1) << 5);
+    IB[1] |= (!digitalRead(A2) << 6);
+    IB[1] |= (!digitalRead(A3) << 7);
+
 }
 
 // ---------------------------------------------------------------------------
@@ -107,7 +107,7 @@ void pack(byte *IB, int len) {
 //  ouput buffer and write them to the correct output ports using either
 //  digitalWrite() or the IO expanders
 //
-//  len bytes are available to be written
+//  len bytes (as set by setNumOutputBytes above) are available to be written
 //  Onboard I/O comes from the first two bytes, followed by IO expander bytes
 //----------------------------------------------------------------------------
 
@@ -116,8 +116,6 @@ void unpack(byte *OB, int len) {
     // OB0 8 bits     OB1 ignored
     // OOOOOOOO       xxxxxxxx
     //----------------------------
-    if (len >= 1) {
-    // lower8
     digitalWrite( 2, (( OB[0] >> 0) &  0x01) );
     digitalWrite( 3, (( OB[0] >> 1) &  0x01) );
     digitalWrite( 4, (( OB[0] >> 2) &  0x01) );
@@ -126,8 +124,8 @@ void unpack(byte *OB, int len) {
     digitalWrite( 7, (( OB[0] >> 5) &  0x01) );
     digitalWrite( 8, (( OB[0] >> 6) &  0x01) );
     digitalWrite( 9, (( OB[0] >> 7) &  0x01) );
-    }
-    // if (len >= 2) ...   // OB[1] is shadowed by the Input bits...
+
+    // OB[1] is shadowed by the Input bits...
 }
 
 void loop(void) {

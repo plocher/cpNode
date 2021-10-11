@@ -94,7 +94,7 @@ void setup(void) {
 //  external I/O expanders and puts the them into the correct IB array bytes
 //  for transmission back to the control host.
 //
-//  len bytes need to be read:
+//  len bytes (as set by setNumInputBytes above) need to be read:
 //  Onboard I/O goes in the first two bytes, IB[0] and IB[1]
 //  The rest of the bytes are used by the optional IO expanders
 // ---------------------------------------------------------------------------
@@ -110,33 +110,35 @@ void pack(byte *IB, int len) {
 //  ouput buffer and write them to the correct output ports using either
 //  digitalWrite() or the IO expanders
 //
-//  len bytes are available to be written
+//  len bytes (as set by setNumOutputBytes above) are available to be written
 //  Onboard I/O comes from the first two bytes, followed by IO expander bytes
 //----------------------------------------------------------------------------
 
 void unpack(byte *OB, int len) {
     // onboard 16 bits (bytes 0 and 1) are inputs...
-    // IOX32 #1 segments 1 & 2
-    if (len >= 3) iox.write(0x20, IOX::PORT_A, OB[2]);
-    if (len >= 4) iox.write(0x20, IOX::PORT_B, OB[3]);
-    if (len >= 5) iox.write(0x21, IOX::PORT_A, OB[4]);
-    if (len >= 6) iox.write(0x21, IOX::PORT_B, OB[5]);
-    // IOX32 #2 segments 1 & 2
-    if (len >= 7) iox.write(0x22, IOX::PORT_A, OB[6]);
-    if (len >= 8) iox.write(0x22, IOX::PORT_B, OB[7]);
-    if (len >= 9) iox.write(0x23, IOX::PORT_A, OB[8]);
-    if (len >=10) iox.write(0x23, IOX::PORT_B, OB[9]);
-    // IOX32 #3 segments 1 & 2
-    if (len >=11) iox.write(0x24, IOX::PORT_A, OB[6]);
-    if (len >=12) iox.write(0x24, IOX::PORT_B, OB[7]);
-    if (len >=13) iox.write(0x25, IOX::PORT_A, OB[8]);
-    if (len >=14) iox.write(0x25, IOX::PORT_B, OB[9]);
-    // IOX32 #4 segments 1 & 2
-    if (len >=15) iox.write(0x26, IOX::PORT_A, OB[6]);
-    if (len >=16) iox.write(0x26, IOX::PORT_B, OB[7]);
-    if (len >=17) iox.write(0x27, IOX::PORT_A, OB[8]);
-    if (len >=18) iox.write(0x27, IOX::PORT_B, OB[9]);
+    // ... OB[0]
+    // ... OB[1]
 
+    // IOX32 #1 segments 1 & 2
+    iox.write(0x20, IOX::PORT_A, OB[2]);
+    iox.write(0x20, IOX::PORT_B, OB[3]);
+    iox.write(0x21, IOX::PORT_A, OB[4]);
+    iox.write(0x21, IOX::PORT_B, OB[5]);
+    // IOX32 #2 segments 1 & 2
+    iox.write(0x22, IOX::PORT_A, OB[6]);
+    iox.write(0x22, IOX::PORT_B, OB[7]);
+    iox.write(0x23, IOX::PORT_A, OB[8]);
+    iox.write(0x23, IOX::PORT_B, OB[9]);
+    // IOX32 #3 segments 1 & 2
+    iox.write(0x24, IOX::PORT_A, OB[6]);
+    iox.write(0x24, IOX::PORT_B, OB[7]);
+    iox.write(0x25, IOX::PORT_A, OB[8]);
+    iox.write(0x25, IOX::PORT_B, OB[9]);
+    // IOX32 #4 segments 1 & 2
+    iox.write(0x26, IOX::PORT_A, OB[6]);
+    iox.write(0x26, IOX::PORT_B, OB[7]);
+    iox.write(0x27, IOX::PORT_A, OB[8]);
+    iox.write(0x27, IOX::PORT_B, OB[9]);
 }
 
 void loop(void) {

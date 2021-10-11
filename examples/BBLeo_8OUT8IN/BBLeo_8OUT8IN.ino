@@ -84,26 +84,22 @@ void setup(void) {
 //  external I/O expanders and puts the them into the correct IB array bytes
 //  for transmission back to the control host.
 //
-//  len bytes need to be read:
+//  len bytes (as set by setNumInputBytes above) need to be read:
 //  Onboard I/O goes in the first two bytes, IB[0] and IB[1]
 //  The rest of the bytes are used by the optional IO expanders
 // ---------------------------------------------------------------------------
 
 void pack(byte *IB, int len) {
-    if (len >= 1) {
-        IB[0] = 0;
-        IB[0] |= (!digitalRead(12) << 0);
-        IB[0] |= (!digitalRead(13) << 1);
-        IB[0] |= (!digitalRead(A0) << 2);
-        IB[0] |= (!digitalRead(A1) << 3);
-        IB[0] |= (!digitalRead(A2) << 4);
-        IB[0] |= (!digitalRead(A3) << 5);
-        IB[0] |= (!digitalRead(A4) << 6);
-        IB[0] |= (!digitalRead(A5) << 7);
-    }
-    if (len >= 2) {
-        IB[1] = 0;
-    }
+    IB[0] = 0;
+    IB[0] |= (!digitalRead(12) << 0);
+    IB[0] |= (!digitalRead(13) << 1);
+    IB[0] |= (!digitalRead(A0) << 2);
+    IB[0] |= (!digitalRead(A1) << 3);
+    IB[0] |= (!digitalRead(A2) << 4);
+    IB[0] |= (!digitalRead(A3) << 5);
+    IB[0] |= (!digitalRead(A4) << 6);
+    IB[0] |= (!digitalRead(A5) << 7);
+    IB[1] = 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -113,21 +109,19 @@ void pack(byte *IB, int len) {
 //  ouput buffer and write them to the correct output ports using either
 //  digitalWrite() or the IO expanders
 //
-//  len bytes are available to be written
+//  len bytes (as set by setNumOutputBytes above) are available to be written
 //  Onboard I/O comes from the first two bytes, followed by IO expander bytes
 //----------------------------------------------------------------------------
 
 void unpack(byte *OB, int len) {
-    if (len >= 1) {
-        digitalWrite(4,  (( OB[0] >> 0) &  0x01) );
-        digitalWrite(5,  (( OB[0] >> 1) &  0x01) );
-        digitalWrite(6,  (( OB[0] >> 2) &  0x01) );
-        digitalWrite(7,  (( OB[0] >> 3) &  0x01) );
-        digitalWrite(8,  (( OB[0] >> 4) &  0x01) );
-        digitalWrite(9,  (( OB[0] >> 5) &  0x01) );
-        digitalWrite(10, (( OB[0] >> 6) &  0x01) );
-        digitalWrite(11, (( OB[0] >> 7) &  0x01) );
-    }
+    digitalWrite(4,  (( OB[0] >> 0) &  0x01) );
+    digitalWrite(5,  (( OB[0] >> 1) &  0x01) );
+    digitalWrite(6,  (( OB[0] >> 2) &  0x01) );
+    digitalWrite(7,  (( OB[0] >> 3) &  0x01) );
+    digitalWrite(8,  (( OB[0] >> 4) &  0x01) );
+    digitalWrite(9,  (( OB[0] >> 5) &  0x01) );
+    digitalWrite(10, (( OB[0] >> 6) &  0x01) );
+    digitalWrite(11, (( OB[0] >> 7) &  0x01) );
 }
 
 void loop(void) {
