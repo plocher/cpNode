@@ -16,8 +16,8 @@
 cpNode cmri;    // Processing logic for handling CMRINet packets
 IOX  iox;
 
-const int  nodeID = 0;                            // 0...63 (nodeID + ord('A') => 'A'..chr(127))
-const long CMRINET_SPEED = 19200;                 // 9600, 19200 ...
+const int  nodeID = 40;                            // 0...63 (nodeID + ord('A') => 'A'..chr(127))
+const long CMRINET_SPEED = 28800;                 // 9600, 19200 ...
 
 // the following need to match the code in setup(), pack() and unpack()...
 const int  InputBytes  = 2 + 0;                    // 2x onboard
@@ -36,8 +36,8 @@ void setup(void) {
     cmri.setNumInputBytes(InputBytes);    // reflected in pack(),   2x onboard plus IOX expander
     cmri.setNumOutputBytes(OutputBytes);  // reflected in unpack(), 2x onboard plus IOX expander
 
-    cmri.invertInputs(  true );           // invert all bits?
-    cmri.invertOutputs( true );
+    cmri.invertInputs(  false );           // invert all bits?
+    cmri.invertOutputs( false );
 
     // *************************************************
     // *******   Setup  Onboard I/O           **********
