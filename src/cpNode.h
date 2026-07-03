@@ -51,15 +51,6 @@ extern "C" {
 
 class cpNode {
 protected:
-    // Library debugging ...
-    enum {
-        DEBUG_ANNOUNCE = 0x01,    // print config info at end of setup...
-        DEBUG_PROTOCOL = 0x02,
-        DEBUG_POLL     = 0x04,
-        DEBUG_INIT     = 0x08,
-    };
-    unsigned int debugging;
-
     //--------------------
     // Protocol characters
     //--------------------
@@ -91,8 +82,15 @@ protected:
 public:
     cpNode(void);
 
-    void setCMRIPort(Stream *port)              { cmriNet = port; }
-    void setDebugPort(Stream *port)             { Monitor = port; }
+    void setCMRIPort(Stream *port, int TXEN_pin = -1)  { 
+            cmriNet = port; 
+            txen_pin = TXEN_pin; 
+            if (txen_pin != -1) {
+                pinMode(txen_pin, OUTPUT);
+                digitalWrite(txen_pin, 0);
+            }
+        }
+    void setDebugPort(Stream *port)             { Monitor = port; debugging = (cpNode::DEBUG_INIT | cpNode::DEBUG_PROTOCOL);}
     byte setNodeAddress(byte nodeAddr);
     byte getNodeAddress(void)                   { return UA - UA_Offset; }
     void invertInputs(bool i)                   { invert_in = i; }
@@ -102,7 +100,15 @@ public:
     void setNumOutputBytes(byte numOutputBytes) { nOB = numOutputBytes; }
     byte getNumOutputBytes(void)                { return nOB; }
     unsigned long getTXDelay(void)              { return DL; }
-    void proceess(void);
+    void proceess(void)                         { process(); } // typo in initial public version...
+    void process(void);
+
+        // Library debugging ...
+    enum {
+        DEBUG_INIT     = 0x01,
+        DEBUG_PROTOCOL = 0x02,
+    };
+    unsigned int debugging;
 
 private:
 
@@ -118,6 +124,7 @@ private:
 
 private:
     Stream *cmriNet;          // protocol...
+    int txen_pin;
     Stream *Monitor;          // debugging (optional, if not NULL...)
     char debug_buffer[128];
 

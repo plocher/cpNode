@@ -82,7 +82,7 @@ byte cpNode::setNodeAddress(byte nodeAddr) {  // Node ID (0..64)
 // ***************************************************
 // *******      Packet Processing Loop      **********
 // ***************************************************
-void cpNode::proceess(void) {
+void cpNode::process(void) {
     //----------------------------------------------
     //  Check for any messages from the host
     //----------------------------------------------
@@ -107,9 +107,6 @@ void cpNode::proceess(void) {
 
      }
 }
-
-
-
 
 //----------------------------------------------------------------------
 //  The input routines collect the bits from the onboard I/O and IO Expander
@@ -156,7 +153,24 @@ void cpNode::callback_unpack_Node_Outputs() {
 //CMRInet Option Bit ProcessING
 //-----------------------------------
 void cpNode::callback_process_cpNode_Options() {
-    // CPNODE IGNORES OPTION BITS
+    int DLH   = CMRInet_Buf[1];
+    int DLL   = CMRInet_Buf[2];
+    int opts1 = CMRInet_Buf[3];
+    int opts2 = CMRInet_Buf[4];
+    int nIN   = CMRInet_Buf[5];
+    int nOUT  = CMRInet_Buf[6];
+
+    // Set up transmit delay
+    // 1 unit of delay(DL) is 10 microseconds
+    //----------------------------------------
+    DL  = (DLH * 256) + DLL;    // Transmit character delay value in 10 us increments
+    DL  = DL * 10;
+
+    if ((Monitor) && ((debugging) & (DEBUG_INIT))) {
+        sprintf(debug_buffer, "   Decoded: Type=%c  DL=%ld nIN=%d (Sketch:%d) nOUT=%d (Sketch:%d)\n",
+                        CMRInet_Buf[0], DL, nIN, nIB, nOUT, nOB );
+        Monitor->print(debug_buffer);
+    }
 }
 
 //-----------------------------------------------------------------------------------------
@@ -167,23 +181,6 @@ void cpNode::callback_process_cpNode_Options() {
 //      SYN SYN STX <UA> <I><NDP> <DLH><DLL> <opts1><opts2> <NIN><NOUT> <000000><ETX>
 //-----------------------------------------------------------------------------------------
 void cpNode::callback_initialize_cpNode() {
-    int DLH = 0,
-        DLL = 0;
-
-    // Set up transmit delay
-    // 1 unit of delay(DL) is 10 microseconds
-    //----------------------------------------
-    DLH = CMRInet_Buf[1];
-    DLL = CMRInet_Buf[2];
-    DL  = (DLH * 256) + DLL;    // Transmit character delay value in 10 us increments
-    DL  = DL * 10;
-
-    if ((Monitor) && ((debugging) & (DEBUG_INIT))) {
-        sprintf(debug_buffer, "INIT: DLH=%d, DLL=%d, DL/10=%ld DL=%ld\n",
-                        DLH, DLL, DL/10, DL );
-        Monitor->print(debug_buffer);
-    }
-
     // Check if initialize message is for a cpNode
     // if so, process any options
     //--------------------------------------------
@@ -240,13 +237,13 @@ void cpNode::callback_CMRI_Poll_Response() {
     CMRInet_Buf[i++] = UA;
     CMRInet_Buf[i++] = 'R';
 
-    // Load the onboard input bytes into the output buffer
+    // Load the input bytes into the buffer
     //----------------------------------------------------
     if (nIB > 0) {
         for (byte j=0; j < nIB; j++) {
             c = IB[j];  // Insert a DLE if the output byte value is a protocol character
             switch(c)  {
-            //  case SYN:   // SYNcs are ignored to conform to the published protocol
+                //case SYN:   
                 case STX:
                 case ETX:
                 case DLE:
@@ -258,34 +255,46 @@ void cpNode::callback_CMRI_Poll_Response() {
         }
     }
 
-
-
     // Add the ETX and send the complete buffer
     //-----------------------------------------
     CMRInet_Buf[i++] = ETX;
 
     // Send the packet to the host
     //----------------------------
+    if (txen_pin != -1) {
+        digitalWrite(txen_pin, 1);
+        //delay(4);
+    }
     for (byte j=0; j<i; j++) {
         cmriNet->write(CMRInet_Buf[j]);
-
         // If a transmit delay was set, delay microseconds
         //------------------------------------------------
         if (DL > 0) {
             delayMicroseconds( DL );   // value in microseconds
         }
     }
+    if (txen_pin != -1) {
+        cmriNet->flush();
+        digitalWrite(txen_pin, 0);
+    }
 
-    if ((Monitor) && ((debugging) & (DEBUG_POLL))) {
-        sprintf(debug_buffer, "Poll Response nIB=%d [\n", nIB );
+
+    if ((Monitor) && ((debugging) & (DEBUG_PROTOCOL))) {
+        sprintf(debug_buffer, ">SYN  SYN STX  ua=%d MsgType=RESP (R) [", UA-'A');
         const char *sep = "";
-        for (byte j=0; j<i; j++) {
-            char item[8];
-            sprintf(item, "%s0x%02x", sep, CMRInet_Buf[j]);
+        for (byte j=5; j<(i - 1); j++) {
+            char item[16];
+            switch (CMRInet_Buf[j]) {
+                case STX: sprintf(item, "%sSTX", sep);                           break;
+                case ETX: sprintf(item, "%sETX", sep);                           break;
+                case DLE: sprintf(item, "%sDLE(0x%02x)", sep, CMRInet_Buf[++j]); break;
+                //case SYN: sprintf(item, "%sSYN", sep);                           break;
+                default:  sprintf(item, "%s0x%02x", sep, CMRInet_Buf[j]);        break;
+            }
             strcat(debug_buffer, item);
-            sep = ", ";
+            sep = " ";
         }
-        strcat(debug_buffer, "]\n");
+        strcat(debug_buffer, "] ETX\n");
         Monitor->print(debug_buffer);
     }
 }
@@ -335,7 +344,7 @@ int cpNode::getPacket() {
     // Check input buffer for a character
     //-----------------------------------
     if (cmriNet->available() <= 0) {
-       return Packet_None;
+          return Packet_None;
     }
 
     //--------------------
@@ -356,7 +365,7 @@ int cpNode::getPacket() {
                     matchID = callback_read_CMRI_Byte();  // Node Address
 
                     if ((Monitor) && ((debugging) & (DEBUG_PROTOCOL))) {
-                        sprintf(debug_buffer, " ua=%c (%d)", matchID, matchID-UA_Offset);
+                        sprintf(debug_buffer, " ua=%d/0x%x", matchID-UA_Offset, matchID);
                         Monitor->print(debug_buffer);
                     }
 
@@ -370,27 +379,26 @@ int cpNode::getPacket() {
                          // Set response code based upon message type
                          //------------------------------------------
                          c = callback_read_CMRI_Byte();        // Message Type
-
-                         if ((Monitor) && ((debugging) & (DEBUG_PROTOCOL))) {
-                             sprintf(debug_buffer, " MsgType=%c IB=", c);
-                             Monitor->print(debug_buffer);
-                         }
+                         const char *action = "????";
 
                          switch( c ) {
                            case 'I':          // Initialization
-                                              resp = Packet_Init;      break;
+                                              action = "INIT"; resp = Packet_Init;      break;
                            case 'P':          // Poll
-                                              resp = Packet_Poll;      break;
+                                              action = "POLL"; resp = Packet_Poll;      break;
                            case 'R':          // Read
-                                              resp = Packet_Read;      break;
+                                              action = "READ"; resp = Packet_Read;      break;
                            case 'T':          // Write (Transmit)
-                                              resp = Packet_Transmit;  break;
+                                              action = "SEND"; resp = Packet_Transmit;  break;
                            default:           // Unknown - Error
                                               resp = Packet_Err;
                                               reading = false;
                                               break;
-                          }
-
+                         }
+                         if ((Monitor) && ((debugging) & (DEBUG_PROTOCOL))) {
+                             sprintf(debug_buffer, " MsgType=%s (%c/0x%x) [", action, c, c);
+                             Monitor->print(debug_buffer);
+                         }
                         // Completed the header, go into message data mode
                         //------------------------------------------------
                         inData = true;
@@ -398,7 +406,7 @@ int cpNode::getPacket() {
                     break;
 
         case ETX:   // End of message, read complete
-                    if ((Monitor) && ((debugging) & (DEBUG_PROTOCOL))) { Monitor->print(" ETX "); }
+                    if ((Monitor) && ((debugging) & (DEBUG_PROTOCOL))) { Monitor->print("] ETX "); }
                     reading = false;
                     break;
 
@@ -420,7 +428,7 @@ int cpNode::getPacket() {
         default:    // Stuff the data character into the receive buffer
 
                     if ((Monitor) && ((debugging) & (DEBUG_PROTOCOL))) {
-                        sprintf(debug_buffer, "{0x%02x}", byte(c));
+                        sprintf(debug_buffer, "0x%02x ", byte(c));
                         Monitor->print(debug_buffer);
                     }
 
@@ -447,13 +455,12 @@ int cpNode::getPacket() {
     CMRInet_Buf[inCnt] = 0;
 
     //---------------------------------------------------------
-    // Match the node address in the message to the UA+65 value
+    // Matched the node address (above)
     // if no match, ignore message, not addessed to this node
     //---------------------------------------------------------
 
     if ((Monitor) && ((debugging) & (DEBUG_PROTOCOL))) {
-        sprintf(debug_buffer, "\n ->inCnt = %d]n", inCnt);
-        Monitor->print(debug_buffer);
+        Monitor->print("\n");
     }
     return resp;
 }  // getPacket

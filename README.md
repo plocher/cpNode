@@ -207,14 +207,12 @@ const int  OutputBytes = 2 + 2;  // 2x onboard plus 1x IOX-16
 
 ## Debugging
 
-  * The "main" hardware serial port on the LOE and ProMini MCUs is used for CMRINet.  If the MCU you are using
+  * The "main" hardware serial port on the LEO and ProMini MCUs is used for CMRINet.  If the MCU you are using
     supports multiple serial ports (such as the Leonardo ATMega32u4, with Serial and Serial1), the USB port can be
     used to display status and debug print statements on the Arduino IDE Monitor window.  
     To enable this feature, use the following code to your setup() routine:
     ```c++
     Serial1.begin(CMRINET_SPEED);   // Set up and Open the CMRInet port
-    while(!Serial1) { };
-
     cmri.setCMRIPort(&Serial1);     // for CMRI/Net protocol
     cmri.setDebugPort(&Serial);     // for debugging on the USB port
     ```
