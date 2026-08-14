@@ -159,9 +159,9 @@ struct IOX_Config {
 IOX_Config expanders[DISP_ROWS] = {
     { 0x20, IN,     OUT    },
     { 0x21, IN,     OUT    },
-    { 0x22, UNUSED, UNUSED },
-    { 0x23, UNUSED, UNUSED },
-    { 0x24, UNUSED, UNUSED },
+    { 0x22, IN,     OUT    },
+    { 0x23, OUT,    IN     },
+    { 0x24, OUT,    IN     },
     { 0x25, UNUSED, UNUSED },
     { 0x26, UNUSED, UNUSED },
     { 0x27, UNUSED, UNUSED },
