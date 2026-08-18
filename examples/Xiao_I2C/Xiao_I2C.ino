@@ -64,11 +64,12 @@
 //                 "t" spins while JMRI is sending us outputs.
 //                 Both frozen means no CMRI traffic is arriving.
 //   Middle rows:  one row per expanders[] table entry (E0..E7; the
-//                 default table maps these to 0x20..0x27), port A on
-//                 the left, port B on the right. 'i' marks an input
-//                 port, 'o' an output port; each small square is one
-//                 bit -- filled = 1, hollow = 0. A bit that just
-//                 changed is briefly boxed to catch your eye. A
+//                 default table maps these to 0x20..0x27), port B on
+//                 the left, port A on the right -- matching the PCB
+//                 wiring. 'i' marks an input port, 'o' an output
+//                 port; each small square is one bit, shown 7..0
+//                 left-to-right -- filled = 1, hollow = 0. A bit that
+//                 just changed is briefly boxed to catch your eye. A
 //                 dashed line marks an unused port.
 //   Bottom line:  network status -- a spinner while WiFi connects,
 //                 then the node's IP address once OTA is ready.

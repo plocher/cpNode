@@ -16,8 +16,8 @@ static const uint8_t GRID_TOP   = 10;   // first expander row
 static const uint8_t ROW_PITCH  = 5;    // vertical px per expander row
 static const uint8_t CELL_SIZE  = 4;    // bit cell width/height
 static const uint8_t CELL_PITCH = 6;    // horizontal px per bit cell
-static const uint8_t DIR_A_X    = 0;    // port A direction glyph
-static const uint8_t DIR_B_X    = 60;   // port B direction glyph
+static const uint8_t PORT_LEFT_X  = 0;    // left port group glyph  (PCB: Port B)
+static const uint8_t PORT_RIGHT_X = 60;   // right port group glyph (PCB: Port A)
 static const uint8_t STATUS_Y   = 56;   // network status line
 
 static const unsigned long OTA_ERROR_HOLD_MS = 5000;
@@ -74,8 +74,9 @@ void NodeDisplay::drawPortCells(uint8_t x, uint8_t y, Dir dir, byte val, byte ha
     if (dir == IN) glyphI(x, y);
     else           glyphO(x, y);
 
-    for (uint8_t b = 0; b < 8; b++) {   // bit 0 leftmost, as before
-        uint8_t cx = cellsX + b * CELL_PITCH;
+    for (uint8_t pos = 0; pos < 8; pos++) {   // PCB order: bit 7 leftmost .. bit 0 rightmost
+        uint8_t b  = 7 - pos;                  // visual position -> bit index
+        uint8_t cx = cellsX + pos * CELL_PITCH;
         if ((val >> b) & 1) oled.fillRect(cx, y, CELL_SIZE, CELL_SIZE, WHITE);
         else                oled.drawRect(cx, y, CELL_SIZE, CELL_SIZE, WHITE);
         if ((halo >> b) & 1) {          // recent change: ring the cell
@@ -85,10 +86,12 @@ void NodeDisplay::drawPortCells(uint8_t x, uint8_t y, Dir dir, byte val, byte ha
 }
 
 void NodeDisplay::drawGrid(void) {
+    // PCB/wiring order: Port B on the left, Port A on the right,
+    // with bits shown 7..0 left-to-right within each port.
     for (uint8_t e = 0; e < DISP_ROWS; e++) {
         uint8_t y = GRID_TOP + e * ROW_PITCH;
-        drawPortCells(DIR_A_X, y, _dirs[e][0], _data[e][0], _delta[e][0]);
-        drawPortCells(DIR_B_X, y, _dirs[e][1], _data[e][1], _delta[e][1]);
+        drawPortCells(PORT_LEFT_X,  y, _dirs[e][1], _data[e][1], _delta[e][1]);  // Port B
+        drawPortCells(PORT_RIGHT_X, y, _dirs[e][0], _data[e][0], _delta[e][0]);  // Port A
     }
 }
 
