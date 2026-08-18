@@ -145,5 +145,5 @@ void unpack(byte *OB, int len) {
 }
 
 void loop(void) {
-    cmri.proceess();   // process any C/MRI packets
+    cmri.process();   // process any C/MRI packets
 }
