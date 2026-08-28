@@ -28,6 +28,14 @@
 #include <Arduino.h>    // for the 'duino infrastructure
 #include <Wire.h>       // for the I/O expander
 
+// Forward declaration: the sketch's NodeDisplay is defined in
+// display.h, which the Arduino preprocessor may not have
+// processed yet when cpNode.h is compiled. A forward
+// declaration lets cpNode.h reference the type for the
+// begin(NodeDisplay*) debug-breadcrumb stash without a hard
+// dependency on the sketch header.
+class NodeDisplay;
+
 // User defined Input/Output handler callbacks
 extern "C" {
 
@@ -93,6 +101,12 @@ public:
 
     void setCMRIPort(Stream *port)              { cmriNet = port; }
     void setDebugPort(Stream *port)             { Monitor = port; }
+    // Debug breadcrumb path: stash the sketch's NodeDisplay so the
+    // library can emit debug breadcrumbs on the OLED during
+    // process()/getPacket()/callback_read_CMRI_Byte(). Optional;
+    // nullptr means no breadcrumbs.
+    void begin(NodeDisplay *display)      { _debugDisplay = display; }
+    NodeDisplay *debugDisplay()             { return _debugDisplay; }
     byte setNodeAddress(byte nodeAddr);
     byte getNodeAddress(void)                   { return UA - UA_Offset; }
     void invertInputs(bool i)                   { invert_in = i; }
@@ -120,6 +134,7 @@ private:
     Stream *cmriNet;          // protocol...
     Stream *Monitor;          // debugging (optional, if not NULL...)
     char debug_buffer[128];
+    NodeDisplay *_debugDisplay;  // optional OLED debug breadcrumbs
 
     int  invert_in;           // for inputs:  CMRI_ACTIVE_LOW or CMRI_ACTIVE_HIGH
     int  invert_out;          // for outputs: CMRI_ACTIVE_LOW or CMRI_ACTIVE_HIGH

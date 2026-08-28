@@ -29,7 +29,8 @@
  *************************************************************/
 #include <Arduino.h>
 #include <Wire.h>  // for the I/O expander
-
+#include "cpNode.h"
+#include "display.h"  // for NodeDisplay debug breadcrumbs
 // User defined callbacks
 
 //----------------------------------------------------------------------
@@ -62,7 +63,8 @@ cpNode::cpNode(void) {
     invert_in = false;
     invert_out = false;
     Monitor = NULL;
-
+    _debugDisplay = nullptr;
+}
 }
 
 
@@ -86,6 +88,7 @@ void cpNode::proceess(void) {
     //----------------------------------------------
     //  Check for any messages from the host
     //----------------------------------------------
+    if (_debugDisplay) _debugDisplay->debug("process", 0);
     switch( getPacket() ) {
       case Packet_None:     break;                           // No data received, ignore
 
@@ -296,10 +299,25 @@ void cpNode::callback_CMRI_Poll_Response() {
 //  Return the character read
 // --------------------------------------------------------
 char cpNode::callback_read_CMRI_Byte() {
+    long int loopcount = 0;
+    char buffer[20];
+
+    if (_debugDisplay) {
+        _debugDisplay->debug("read_CMRI_Byte:", 2);
+        sprintf(buffer, "avail=%d", cmriNet->available());
+        _debugDisplay->debug(buffer, 3);
+    }
+
     while (true) {
         if (cmriNet->available() > 0) {
+            if (_debugDisplay) _debugDisplay->debug("have byte", 4);
             return char(cmriNet->read());
         }
+        if (_debugDisplay) {
+            sprintf(buffer, "spin (%ld)", loopcount);
+            _debugDisplay->debug(buffer, 5);
+        }
+        loopcount++;
     }
 }
 
@@ -335,8 +353,10 @@ int cpNode::getPacket() {
     // Check input buffer for a character
     //-----------------------------------
     if (cmriNet->available() <= 0) {
-       return Packet_None;
+          if (_debugDisplay) _debugDisplay->debug("getPacket: empty", 1);
+          return Packet_None;
     }
+    if (_debugDisplay) _debugDisplay->debug("getPacket: have byte", 1);
 
     //--------------------
     // Process the message
